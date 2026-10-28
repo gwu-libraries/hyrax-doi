@@ -54,6 +54,13 @@ describe Hyrax::DOI::InstallGenerator, type: :generator do
         expect(file(solr_document_path)).to contain('include Hyrax::DOI::SolrDocument::DataCiteDOIBehavior')
       end
     end
+
+    context 'crossref enabled' do
+      it 'adds behavior module to solr_document' do
+        run_generator ["--crossref"]
+        expect(file(solr_document_path)).to contain('include Hyrax::DOI::SolrDocument::CrossrefDOIBehavior')
+      end
+    end
   end
 
   describe 'inject_engine_routes' do

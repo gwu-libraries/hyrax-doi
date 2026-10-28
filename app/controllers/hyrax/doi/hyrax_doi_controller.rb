@@ -18,7 +18,7 @@ module Hyrax
             format.json { render_json_response(response_type: :internal_error, message: I18n.t("errors.doi_minting.disabled")) }
           end
         end
-      rescue Hyrax::DOI::DataCiteClient::Error => e
+      rescue Hyrax::DOI::DataCiteClient::Error, Hyrax::DOI::CrossrefClient::Error => e
         respond_to do |format|
           format.js { render plain: e.message, status: :internal_server_error }
           format.json { render_json_response(response_type: :internal_error, message: e.full_message) }
@@ -48,8 +48,20 @@ module Hyrax
       end
 
       def doi_registrar
-        # TODO: generalize this
-        Hyrax::Identifier::Registrar.for(:datacite)
+        registrar_type = find_registrar_type
+        Hyrax::Identifier::Registrar.for(registrar_type.to_sym)
+      end
+
+      def find_registrar_type
+        if params[:curation_concern].present?
+          concern_class = params[:curation_concern].camelize.safe_constantize
+          if concern_class
+            instance = concern_class.new
+            return instance.doi_registrar if instance.respond_to?(:doi_registrar) && instance.doi_registrar.present?
+          end
+        end
+
+        Hyrax.config.identifier_registrars.keys.first || :datacite
       end
 
       def use_sandbox
@@ -99,7 +111,7 @@ module Hyrax
       # Override of Hyrax method (See https://github.com/samvera/hyrax/pull/4495)
       # render a json response for +response_type+
       def render_json_response(response_type: :success, message: nil, options: {})
-        json_body = Hyrax::API.generate_response_body(response_type:, message:, options:)
+        json_body = Hyrax::API.generate_response_body(response_type: response_type, message: message, options: options)
         render json: json_body, status: Hyrax::API.default_responses[response_type][:code]
       end
     end

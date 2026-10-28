@@ -59,6 +59,24 @@ describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
         end
       end
     end
+
+    context 'crossref enabled' do
+      it 'adds behavior module to model class' do
+        run_generator [klass, "--crossref"]
+        expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
+        expect(file(model_path)).to contain('include Hyrax::DOI::CrossrefDOIBehavior')
+      end
+
+      context 'with a namespaced model class' do
+        let(:klass) { 'NamespacedWorks::NestedWork' }
+
+        it 'adds behavior module to model class' do
+          run_generator [klass, "--crossref"]
+          expect(file(model_path)).to contain('include Hyrax::DOI::DOIBehavior')
+          expect(file(model_path)).to contain('include Hyrax::DOI::CrossrefDOIBehavior')
+        end
+      end
+    end
   end
 
   describe 'inject_into_form' do
@@ -93,6 +111,24 @@ describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
         end
       end
     end
+
+    context 'crossref enabled' do
+      it 'adds behavior module to form class' do
+        run_generator [klass, "--crossref"]
+        expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
+        expect(file(form_path)).to contain('include Hyrax::DOI::CrossrefDOIFormBehavior')
+      end
+
+      context 'with a namespaced model class' do
+        let(:klass) { 'NamespacedWorks::NestedWork' }
+
+        it 'adds behavior module to form class' do
+          run_generator [klass, "--crossref"]
+          expect(file(form_path)).to contain('include Hyrax::DOI::DOIFormBehavior')
+          expect(file(form_path)).to contain('include Hyrax::DOI::CrossrefDOIFormBehavior')
+        end
+      end
+    end
   end
 
   describe 'inject_into_presenter' do
@@ -124,6 +160,24 @@ describe Hyrax::DOI::AddToWorkTypeGenerator, type: :generator do
           run_generator [klass, "--datacite"]
           expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
           expect(file(presenter_path)).to contain('include Hyrax::DOI::DataCiteDOIPresenterBehavior')
+        end
+      end
+    end
+
+    context 'crossref enabled' do
+      it 'adds behavior module to presenter class' do
+        run_generator [klass, "--crossref"]
+        expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+        expect(file(presenter_path)).to contain('include Hyrax::DOI::CrossrefDOIPresenterBehavior')
+      end
+
+      context 'with a namespaced presenter class' do
+        let(:klass) { 'NamespacedWorks::NestedWork' }
+
+        it 'adds behavior module to presenter class' do
+          run_generator [klass, "--crossref"]
+          expect(file(presenter_path)).to contain('include Hyrax::DOI::DOIPresenterBehavior')
+          expect(file(presenter_path)).to contain('include Hyrax::DOI::CrossrefDOIPresenterBehavior')
         end
       end
     end

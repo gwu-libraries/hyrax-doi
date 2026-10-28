@@ -52,10 +52,16 @@ module Hyrax
         work.class.ancestors.include? Hyrax::DOI::DOIBehavior
       end
 
-      # FIXME: Find a way to push this into the registrar since it is Datacite specific
       # Check that requested doi_status_when_public is valid
       def valid_public_status?(work)
-        !work.respond_to?(:doi_status_when_public) || work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
+        return true unless work.respond_to?(:doi_status_when_public) && work.doi_status_when_public.present?
+
+        registrar_class = Hyrax.config.identifier_registrars[work.doi_registrar&.to_sym]
+        if registrar_class && registrar_class.const_defined?(:STATES)
+          work.doi_status_when_public.in?(registrar_class::STATES)
+        else
+          work.doi_status_when_public.in?(Hyrax::DOI::DataCiteRegistrar::STATES)
+        end
       end
     end
   end

@@ -55,6 +55,38 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
           expect(response.body).to be_present
         end
       end
+
+      context 'with crossref registrar' do
+        let(:crossref_prefix) { '10.5678' }
+
+        before do
+          Hyrax.config.identifier_registrars = { crossref: Hyrax::DOI::CrossrefRegistrar }
+          Hyrax::DOI::CrossrefRegistrar.mode = :test
+          Hyrax::DOI::CrossrefRegistrar.prefix = crossref_prefix
+          Hyrax::DOI::CrossrefRegistrar.username = 'username'
+          Hyrax::DOI::CrossrefRegistrar.password = 'password'
+        end
+
+        it 'returns a JS with the new Crossref DOI' do
+          get :create_draft_doi, params: { format: :js, curation_concern: 'generic_work' }, xhr: true
+
+          expect(response).to have_http_status(:created)
+          expect(response.body).to include crossref_prefix
+        end
+
+        context 'with crossref error' do
+          before do
+            allow_any_instance_of(Hyrax::DOI::CrossrefRegistrar).to receive(:mint_draft_doi).and_raise(Hyrax::DOI::CrossrefClient::Error, "Error")
+          end
+
+          it 'returns a failure' do
+            get :create_draft_doi, params: { format: :js, curation_concern: 'generic_work' }, xhr: true
+
+            expect(response).to have_http_status(:internal_server_error)
+            expect(response.body).to be_present
+          end
+        end
+      end
     end
 
     context 'JSON format' do
@@ -97,7 +129,7 @@ RSpec.describe Hyrax::DOI::HyraxDOIController, :datacite_api, type: :controller 
 
       context 'with valid doi' do
         let(:input) { File.join(Hyrax::DOI::Engine.root, 'spec', 'fixtures', 'datacite.json') }
-        let(:metadata) { Bolognese::Metadata.new(input:) }
+        let(:metadata) { Bolognese::Metadata.new(input: input) }
         let(:model_class) do
           Class.new(GenericWork) do
             include Hyrax::DOI::DOIBehavior

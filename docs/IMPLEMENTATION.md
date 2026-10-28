@@ -29,7 +29,11 @@ Use the `--datacite` flag if working with DataCite DOIs:
 ```
 rails g hyrax:doi:install --datacite
 ```
-If not using DataCite DOIs:
+Or the `--crossref` flag if working with Crossref DOIs:
+```
+rails g hyrax:doi:install --crossref
+```
+If not using registrar-specific extensions:
 ```
 rails g hyrax:doi:install
 ```
@@ -42,7 +46,11 @@ Add the `--datacite` flag if creating DataCite DOIs:
 ```
 rails g hyrax:doi:add_to_work_type MyWorkType --datacite
 ```
-If not using DataCite DOIs:
+Or the `--crossref` flag if creating Crossref DOIs:
+```
+rails g hyrax:doi:add_to_work_type MyWorkType --crossref
+```
+If not using registrar-specific extensions:
 
 ```
 rails g hyrax:doi:add_to_work_type MyWorkType
@@ -62,6 +70,15 @@ Set up connection to DOI Registration Agent.
 Hyrax::DOI::DataCiteRegistrar.prefix = ENV['DATACITE_PREFIX']
 Hyrax::DOI::DataCiteRegistrar.username = ENV['DATACITE_USERNAME']
 Hyrax::DOI::DataCiteRegistrar.password = ENV['DATACITE_PASSWORD']
+```
+* Or for Crossref:
+```ruby
+Hyrax::DOI::CrossrefRegistrar.prefix = ENV['CROSSREF_PREFIX']
+Hyrax::DOI::CrossrefRegistrar.username = ENV['CROSSREF_USERNAME']
+Hyrax::DOI::CrossrefRegistrar.password = ENV['CROSSREF_PASSWORD']
+# Hyrax::DOI::CrossrefRegistrar.depositor_name = ENV['CROSSREF_DEPOSITOR_NAME']
+# Hyrax::DOI::CrossrefRegistrar.depositor_email = ENV['CROSSREF_DEPOSITOR_EMAIL']
+# Hyrax::DOI::CrossrefRegistrar.registrant = ENV['CROSSREF_REGISTRANT']
 ```
 * Should you be using something like a Helm Chart to manage your production and development environment variables then you will want to store your production credentials in the `app_name/chart/production-values.yaml.enc` and your test credentials from Fabrica in the `app_name/chart/dev-values.yaml.enc`
 
